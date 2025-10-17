@@ -13,6 +13,14 @@ body {
     line-height: 1.5em;
 }
 
+.headline_black{
+    font-size: 3em;
+    font-family: "Caveat Brush", cursive;
+    font-weight: 600;
+    margin-top: 80px;
+    margin-bottom: 60px;
+}
+
 /* title */
 #title-wrapper {
     text-align: center;
@@ -20,7 +28,7 @@ body {
 
 .headline {
     font-size: 3em;
-    font-family: 'Schoolbell', cursive;
+    font-family: "Caveat Brush", cursive;
     font-weight: 600;
     margin-top: 80px;
     margin-bottom: 60px;
