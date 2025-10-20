@@ -9,7 +9,7 @@ body {
     background-color: darkcyan;
     color: black;
     font-family: 'Schoolbell', cursive;
-    font-size: 1em;
+    font-size: 1.3em;
     line-height: 1.5em;
 }
 
@@ -98,11 +98,12 @@ body {
 
 /* p5.js sketch */
 canvas {
-    display: block;
+    position: absolute;
+    top: 25%;
+    left: 22%;
 }
 
 #p5-canvas-container {
-    margin: auto;
-    display: flex;
+    margin: 600px;
     width: 800px;
 }
