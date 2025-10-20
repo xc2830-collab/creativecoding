@@ -103,5 +103,6 @@ canvas {
 
 #p5-canvas-container {
     margin: auto;
+    display: flex;
     width: 800px;
 }
