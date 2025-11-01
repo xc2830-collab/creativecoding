@@ -18,7 +18,7 @@ function setup() {
   canvas.parent("p5-canvas-container");
 
   // ...except to adjust the dancer's name on the next line:
-  dancer = new YourNameDancer(width / 2, height / 2);
+  dancer = new cynthiaDancer(width / 2, height / 2);
 }
 
 function draw() {
@@ -32,29 +32,107 @@ function draw() {
 
 // You only code inside this class.
 // Start by giving the dancer your name, e.g. LeonDancer.
-class YourNameDancer {
+class cynthiaDancer {
   constructor(startX, startY) {
     this.x = startX;
     this.y = startY;
     // add properties for your dancer here:
-    //..
+    this.amp = random(50, 70);
+    this.blinkCount = 0;
     //..
     //..
   }
   update() {
     // update properties here to achieve
     // your dancer's desired moves and behaviour
+
+    // blink
+    if (frameCount % 120 === 0 && this.blinkCount === 0) {
+      this.blinkCount = 8;
+    }
+    if (this.blinkCount > 0) {
+      this.blinkCount--;
+    }
   }
   display() {
     // the push and pop, along with the translate 
     // places your whole dancer object at this.x and this.y.
     // you may change its position on line 19 to see the effect.
     push();
-    translate(this.x, this.y);
+    translate(this.x, this.y + 100);
 
     // ******** //
     // ⬇️ draw your dancer from here ⬇️
 
+    //===== body =====
+    fill(55, 150, 100);
+    circle(100, 0, 90);
+    strokeWeight(5);
+    stroke(10, 250, 20);
+    line(20, 30, 100, 84);
+    line(180, 30, 130, 84);
+    noStroke();
+
+    circle(100, 84, 80);
+    fill(255, 150, 60);
+    circle(120, 2 * 78, 70);
+    fill(55, 150, 100);
+    circle(150, 3 * 71, 60);
+
+    push();
+    translate(202, 3 * 77);
+    rotate(sin(frameCount * 0.1));
+    fill(255, 150, 60);
+    circle(0, 0, 50);
+    fill(55, 150, 100);
+    circle(49, 10, 49);
+    fill(255, 150, 60);
+    circle(94, 10, 40);
+    fill(55, 150, 100);
+    circle(129, 10, 30);
+    pop();
+
+    //==== face ======
+    fill(0);
+    circle(80, -5, 10);
+    circle(120, -5, 10);
+    fill(color('pink'));
+    ellipse(65, 3, 10, 5);
+    ellipse(135, 3, 10, 5);
+
+    noFill();
+    stroke(0);
+    strokeWeight(2);
+    arc(100, 10, 20, 10, 0, PI);
+    noStroke();
+
+    // === chujiao ===
+    stroke(10, 250, 20);
+    strokeWeight(2);
+    let headX = 100;
+    let headY = 0;
+    let rHead = 45;
+    let sway = sin(frameCount * 0.12) * 6;
+    line(headX - 12, headY - rHead + 8, headX - 32 - sway, headY - rHead - 25);
+    line(headX + 12, headY - rHead + 8, headX + 32 + sway, headY - rHead - 25);
+    noStroke();
+
+
+
+    // === blink ===
+    if (this.blinkCount > 0) {
+      fill(55, 150, 100);
+      noStroke();
+      rect(75, -10, 10, 10, 2);
+      rect(115, -10, 10, 10, 2);
+      stroke(40, 120);
+      strokeWeight(2);
+      line(75, -5, 85, -5);
+      line(115, -5, 125, -5);
+      noStroke();
+    }
+
+    this.y = 100 + sin(frameCount / 20) * this.amp;
 
 
 
@@ -72,16 +150,11 @@ class YourNameDancer {
     this.drawReferenceShapes()
 
     pop();
+
   }
   drawReferenceShapes() {
-    noFill();
-    stroke(255, 0, 0);
-    line(-5, 0, 5, 0);
-    line(0, -5, 0, 5);
-    stroke(255);
-    rect(-100, -100, 200, 200);
-    fill(255);
-    stroke(0);
+
+
   }
 }
 
