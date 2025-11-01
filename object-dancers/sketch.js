@@ -67,10 +67,12 @@ class cynthiaDancer {
     //===== body =====
     fill(55, 150, 100);
     circle(100, 0, 90);
+    //arm
+    let armSwing = map(sin(frameCount / 20), -1, 1, 10, -10);
     strokeWeight(5);
     stroke(10, 250, 20);
-    line(20, 30, 100, 84);
-    line(180, 30, 130, 84);
+    line(20, 30 + armSwing, 100, 84 + armSwing);
+    line(180, 30 + armSwing, 130, 84 + armSwing);
     noStroke();
 
     circle(100, 84, 80);
