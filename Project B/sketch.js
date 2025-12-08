@@ -18,7 +18,9 @@ let objects = [];
 let thismachine = [];
 let shakeSound;
 let levelSound;
-
+let coinSize = 40;
+let holdingCoin = false;
+let coinInserted = false;
 let obj;
 let particles = [];
 let NUM_OF_PARTICLES = 30;
@@ -115,6 +117,7 @@ function setup() {
 
 }
 function draw() {
+
   background('#FCB9B2');
   thismachine.update();
   thismachine.display();
@@ -129,6 +132,14 @@ function draw() {
       particles.splice(i, 1);
     }
   }
+  drawCoin();
+  if (holdingCoin) {
+    noCursor();
+    drawCoinCursor();
+  } else {
+    cursor();
+  }
+
 }
 class EmotionObj {
   constructor(x, y, size, frames, sounds) {
@@ -185,7 +196,19 @@ class EmotionObj {
   }
 }
 function mousePressed() {
-  thismachine.checkBoudary(mouseX, mouseY);
+  let coinX = width - 60;
+  let coinY = height - 60;
+
+  if (dist(mouseX, mouseY, coinX, coinY) < coinSize / 2) {
+    holdingCoin = !holdingCoin;
+  }
+  else if (!holdingCoin) {
+    // do nothing
+  }
+  else {
+    thismachine.checkBoudary(mouseX, mouseY);
+    holdingCoin = false;
+  }
 }
 class Machine {
   constructor(x, y) {
@@ -350,3 +373,31 @@ class Particle {
     pop();
   }
 }
+function drawCoin() {
+  push();
+  noStroke();
+  fill('#E6D14A');
+  let coinX = width - 60;
+  let coinY = height - 60;
+
+  circle(coinX, coinY, coinSize);
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  text('$', coinX, coinY);
+
+  pop();
+}
+function drawCoinCursor() {
+  push();
+  noStroke();
+  fill('#E6D14A');
+  circle(mouseX, mouseY, coinSize);
+
+  fill(0);
+  textAlign(CENTER, CENTER);
+  textSize(20);
+  text('$', mouseX, mouseY);
+  pop();
+}
+
