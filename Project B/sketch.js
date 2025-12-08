@@ -157,9 +157,10 @@ function draw() {
   }
   if (showHint && holdingCoin && !coinInserted) {
     fill(0);
-    textSize(10);
-    text("Coin goes here!", thismachine.x + 200, thismachine.y + 170);
+    textSize(14);
+    text("coin goes here!", thismachine.x + 150, thismachine.y + 130);
   }
+
 
 }
 class EmotionObj {
@@ -232,18 +233,18 @@ function mousePressed() {
     }
   }
   if (holdingCoin) {
-    textSize(10);
-    text("Coin goes here!", thismachine.x + 200, thismachine.y + 1200);
     let slotX = thismachine.x + 150;
     let slotY = thismachine.y + 150;
     let slotW = 4;
     let slotH = 19;
 
-    if (mouseX > slotX - slotW / 2 && mouseX < slotX + slotW / 2 &&
-      mouseY > slotY - slotH / 2 && mouseY < slotY + slotH / 2) {
-
+    if (mouseX > slotX - slotW / 2 - 30 &&
+      mouseX < slotX + slotW / 2 + 30 &&
+      mouseY > slotY - slotH / 2 - 30 &&
+      mouseY < slotY + slotH / 2 + 30) {
       holdingCoin = false;
       coinInserted = true;
+      showHint = false;
       coinSound.play();
     }
   }
