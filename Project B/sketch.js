@@ -17,8 +17,8 @@ let sound8 = [];
 let objects = [];
 let thismachine = [];
 let shakeSound;
-// let machineLayer;
-// let emotionLayer;
+let levelSound;
+
 let obj;
 let particles = [];
 let NUM_OF_PARTICLES = 30;
@@ -87,9 +87,11 @@ function preload() {
   sound8.push(loadSound("assets/Emotion8/surprise3.mp3"));
 
   shakeSound = loadSound('assets/machineshake.mp3');
+  levelSound = loadSound('assets/level.mp3');
 }
 function setup() {
   let canvas = createCanvas(800, 500);
+  textFont("Bitcount Prop Single");
   canvas.parent("p5-canvas-container");
   imageMode(CENTER);
   rectMode(CENTER);
@@ -110,8 +112,7 @@ function setup() {
   let obj8 = new EmotionObj(500, 300, 0.15, emotion8, sound8);
   objects.push(obj8);
   thismachine = new Machine(width / 2, height / 2,);
-  sound3[0].setVolume(1.7);
-  sound3[2].setVolume(1.7);
+
 }
 function draw() {
   background('#FCB9B2');
@@ -203,9 +204,15 @@ class Machine {
     this.progress = 0;
     this.isDrawn = false;
     this.shakeSoundPlayed = false;
+    this.levelSoundPlayed = false;
   }
   update() {
     if (this.ispushed == true) {
+      if (!this.levelSoundPlayed) {
+        levelSound.play();
+        levelSound.setVolume(1);
+        this.levelSoundPlayed = true;
+      }
       if (this.isRotating == true) {
         this.progress += 0.02;
         this.angle = sin(this.progress * PI) * 0.2;
@@ -218,7 +225,7 @@ class Machine {
       else if (this.isShaking == true) {
         if (!this.shakeSoundPlayed) {
           shakeSound.play();
-          shakeSound.setVolume(1.2);
+          shakeSound.setVolume(1.6);
           this.shakeSoundPlayed = true;
         }
         this.progress += 0.01;
@@ -252,7 +259,7 @@ class Machine {
         let idx = int(random(imgs.length));
         let chosenImg = imgs[idx];
         for (let i = 0; i < NUM_OF_PARTICLES; i++) {
-          particles.push(new Particle(500, 400, chosenImg));
+          particles.push(new Particle(380, 400, chosenImg));
         }
 
         let soundArray = null;
@@ -302,14 +309,16 @@ class Machine {
     line(-235, 1, 140, 1);
     fill(0);
     rect(0, 150, 150, 50);
-    textSize(19);
-    text('Emotion Lottery Machine', -150, -140);
+    circle(120, 150, 30);
+    textSize(24);
+    text('Emotion Lottery Machine', -190, -140);
     pop();
   }
   checkBoudary(mx, my) {
     let distance = dist(mx, my, this.x + 240, this.y)
     if (distance < 25) {
       this.shakeSoundPlayed = false; // ???
+      this.levelSoundPlayed = false;
       this.ispushed = true;
       this.isRotating = true;
       this.isShaking = false;
