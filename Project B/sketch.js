@@ -18,6 +18,7 @@ let objects = [];
 let thismachine = [];
 let shakeSound;
 let levelSound;
+let coinSound;
 let coinSize = 40;
 let holdingCoin = false;
 let coinInserted = false;
@@ -26,6 +27,10 @@ let particles = [];
 let NUM_OF_PARTICLES = 30;
 let imgDrawn = ['assets/Emotion1/frame_0006.png', 'assets/Emotion2/frame006.png', 'assets/Emotion3/frame0011.png', 'assets/Emotion4/frame006.png', 'assets/Emotion5/frame007.png', 'assets/Emotion6/frame0010.png', 'assets/Emotion7/frame005.png', 'assets/Emotion8/frame005.png'];
 let imgs = [];
+let hintStartTime = 720;
+let coinFloatOffset = 0;
+let showHint = false;
+
 function preload() {
   for (let i = 0; i < imgDrawn.length; i++) {
     imgs[i] = loadImage(imgDrawn[i]);
@@ -90,6 +95,7 @@ function preload() {
 
   shakeSound = loadSound('assets/machineshake.mp3');
   levelSound = loadSound('assets/level.mp3');
+  coinSound = loadSound('assets/coin.mp3');
 }
 function setup() {
   let canvas = createCanvas(800, 500);
@@ -121,6 +127,9 @@ function draw() {
   background('#FCB9B2');
   thismachine.update();
   thismachine.display();
+
+
+
   for (let i = 0; i < objects.length; i++) {
     objects[i].update();
     objects[i].display();
@@ -138,6 +147,18 @@ function draw() {
     drawCoinCursor();
   } else {
     cursor();
+  }
+
+  if (holdingCoin) {
+    noCursor();
+    drawCoinCursor();
+  } else {
+    cursor();
+  }
+  if (showHint && holdingCoin && !coinInserted) {
+    fill(0);
+    textSize(10);
+    text("Coin goes here!", thismachine.x + 200, thismachine.y + 170);
   }
 
 }
@@ -191,23 +212,64 @@ class EmotionObj {
     push();
     translate(this.x + (thismachine.x - thismachine.originalX), this.y + (thismachine.y - thismachine.originalY));
     scale(this.size);
-    image(this.frames[this.curImage], 0, 0);
+    image(this.frames[this.curImage], -10, 0);
     pop();
   }
 }
 function mousePressed() {
-  let coinX = width - 60;
-  let coinY = height - 60;
+  let coinX = width - 70;
+  let coinY = height - 70;
 
-  if (dist(mouseX, mouseY, coinX, coinY) < coinSize / 2) {
-    holdingCoin = !holdingCoin;
+  let slotX = thismachine.x + 170;
+  let slotY = thismachine.y + 190;
+
+
+  if (!coinInserted) {
+    let d1 = dist(mouseX, mouseY, coinX, coinY);
+    if (d1 < coinSize / 2) {
+      holdingCoin = true;
+      showHint = true;
+    }
   }
-  else if (!holdingCoin) {
+  if (holdingCoin) {
+    textSize(10);
+    text("Coin goes here!", thismachine.x + 200, thismachine.y + 1200);
+    let slotX = thismachine.x + 150;
+    let slotY = thismachine.y + 150;
+    let slotW = 4;
+    let slotH = 19;
+
+    if (mouseX > slotX - slotW / 2 && mouseX < slotX + slotW / 2 &&
+      mouseY > slotY - slotH / 2 && mouseY < slotY + slotH / 2) {
+
+      holdingCoin = false;
+      coinInserted = true;
+      coinSound.play();
+    }
+  }
+
+
+  if (!coinInserted) {
     // do nothing
   }
   else {
-    thismachine.checkBoudary(mouseX, mouseY);
-    holdingCoin = false;
+    let leverX = thismachine.x + 230;
+    let leverY = thismachine.y;
+
+    let d3 = dist(mouseX, mouseY, leverX, leverY);
+    if (d3 < 25 && coinInserted) {
+      thismachine.shakeSoundPlayed = false;
+      thismachine.levelSoundPlayed = false;
+
+      thismachine.ispushed = true;
+      thismachine.isRotating = true;
+      thismachine.isShaking = false;
+      thismachine.isResetting = false;
+      thismachine.progress = 0;
+
+      // use coin
+      coinInserted = false;
+    }
   }
 }
 class Machine {
@@ -325,17 +387,30 @@ class Machine {
     pop();
     push();
     translate(this.x, this.y);
+    fill('#F5FA32');
+    rect(245, -140, 140, 100);
+    fill(0);
+    textSize(14);
+    text('0.001%', 190, -160);
+    textSize(12);
+    text('chance to', 240, -160);
+    text('WIN', 230, -140);
+    text('A SPECIAL EMOTION', 190, -120);
+    text('<------------------', 200, -100);
     fill("#CF4040");
     rect(-50, 0, 450, 380);
     fill(250);
     rect(-50, 0, 390, 220);
     line(-235, 1, 140, 1);
     fill(0);
-    rect(0, 150, 150, 50);
-    circle(120, 150, 30);
+    rect(-50, 150, 300, 50);
+    circle(150, 150, 30);
+    fill(255);
+    rect(150, 150, 4, 19);
     textSize(24);
     text('Emotion Lottery Machine', -190, -140);
     pop();
+
   }
   checkBoudary(mx, my) {
     let distance = dist(mx, my, this.x + 240, this.y)
@@ -374,29 +449,37 @@ class Particle {
   }
 }
 function drawCoin() {
+  let coinX = width - 70;
+  let coinY = height - 70;
+
+  if (frameCount > hintStartTime && !holdingCoin && !coinInserted) {
+    coinFloatOffset = sin(frameCount * 0.05) * 6;
+  } else {
+    coinFloatOffset = 0;
+  }
+
+  coinY += coinFloatOffset;
+
   push();
   noStroke();
   fill('#E6D14A');
-  let coinX = width - 60;
-  let coinY = height - 60;
-
   circle(coinX, coinY, coinSize);
   fill(0);
   textAlign(CENTER, CENTER);
   textSize(20);
   text('$', coinX, coinY);
-
   pop();
 }
+
 function drawCoinCursor() {
   push();
-  noStroke();
   fill('#E6D14A');
-  circle(mouseX, mouseY, coinSize);
+  noStroke();
+  circle(mouseX, mouseY, 20);
 
   fill(0);
   textAlign(CENTER, CENTER);
-  textSize(20);
+  textSize(14);
   text('$', mouseX, mouseY);
   pop();
 }
