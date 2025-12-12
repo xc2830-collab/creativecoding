@@ -30,6 +30,10 @@ let imgs = [];
 let hintStartTime = 720;
 let coinFloatOffset = 0;
 let showHint = false;
+let s = 10;
+let bgColor;
+let isActive = false;
+let currentSound = null;
 
 function preload() {
   for (let i = 0; i < imgDrawn.length; i++) {
@@ -98,42 +102,55 @@ function preload() {
   coinSound = loadSound('assets/coin.mp3');
 }
 function setup() {
-  let canvas = createCanvas(800, 500);
+  let canvas = createCanvas(windowWidth, windowHeight);
   textFont("Bitcount Prop Single");
   canvas.parent("p5-canvas-container");
   imageMode(CENTER);
   rectMode(CENTER);
-  let obj1 = new EmotionObj(200, 200, 0.1, emotion1, sound1);
+  let obj1 = new EmotionObj(width * 0.37, height * 0.45, 0.1, emotion1, sound1);
   objects.push(obj1);
-  let obj2 = new EmotionObj(300, 200, 0.2, emotion2, sound2);
+  let obj2 = new EmotionObj(width * 0.43, height * 0.45, 0.2, emotion2, sound2);
   objects.push(obj2);
-  let obj3 = new EmotionObj(400, 200, 0.2, emotion3, sound3);
+  let obj3 = new EmotionObj(width * 0.5, height * 0.45, 0.2, emotion3, sound3);
   objects.push(obj3);
-  let obj4 = new EmotionObj(500, 200, 0.07, emotion4, sound4);
+  let obj4 = new EmotionObj(width * 0.57, height * 0.45, 0.07, emotion4, sound4);
   objects.push(obj4);
-  let obj5 = new EmotionObj(200, 300, 0.2, emotion5, sound5);
+  let obj5 = new EmotionObj(width * 0.37, height * 0.58, 0.2, emotion5, sound5);
   objects.push(obj5);
-  let obj6 = new EmotionObj(300, 300, 0.2, emotion6, sound6);
+  let obj6 = new EmotionObj(width * 0.43, height * 0.58, 0.2, emotion6, sound6);
   objects.push(obj6);
-  let obj7 = new EmotionObj(400, 300, 0.1, emotion7, sound7);
+  let obj7 = new EmotionObj(width * 0.5, height * 0.58, 0.1, emotion7, sound7);
   objects.push(obj7);
-  let obj8 = new EmotionObj(500, 300, 0.15, emotion8, sound8);
+  let obj8 = new EmotionObj(width * 0.57, height * 0.58, 0.15, emotion8, sound8);
   objects.push(obj8);
   thismachine = new Machine(width / 2, height / 2,);
 
 }
-function draw() {
 
-  background('#FCB9B2');
+function windowResized() {
+  resizeCanvas(windowWidth, windowHeight);
+
+}
+function draw() {
+  if (isActive && currentSound && !currentSound.isPlaying()) {
+    bgColor = color('#FABBAF');
+    isActive = false;
+  }
+
+  if (!isActive) {
+    bgColor = color('#FABBAF');
+  }
+
+  background(bgColor);
+
   thismachine.update();
   thismachine.display();
-
-
 
   for (let i = 0; i < objects.length; i++) {
     objects[i].update();
     objects[i].display();
   }
+
   for (let i = particles.length - 1; i >= 0; i--) {
     particles[i].move();
     particles[i].display();
@@ -141,13 +158,8 @@ function draw() {
       particles.splice(i, 1);
     }
   }
+
   drawCoin();
-  if (holdingCoin) {
-    noCursor();
-    drawCoinCursor();
-  } else {
-    cursor();
-  }
 
   if (holdingCoin) {
     noCursor();
@@ -155,14 +167,15 @@ function draw() {
   } else {
     cursor();
   }
+
   if (showHint && holdingCoin && !coinInserted) {
     fill(0);
     textSize(14);
     text("coin goes here!", thismachine.x + 150, thismachine.y + 130);
   }
-
-
 }
+
+
 class EmotionObj {
   constructor(x, y, size, frames, sounds) {
     this.x = x;
@@ -179,6 +192,7 @@ class EmotionObj {
     let d = dist(mouseX, mouseY, this.x, this.y);
     if (d < 30) {
       this.isHovering = true;
+
     } else {
       this.isHovering = false;
     }
@@ -218,8 +232,8 @@ class EmotionObj {
   }
 }
 function mousePressed() {
-  let coinX = width - 70;
-  let coinY = height - 70;
+  let coinX = width - 270;
+  let coinY = height - 170;
 
   let slotX = thismachine.x + 170;
   let slotY = thismachine.y + 190;
@@ -228,10 +242,18 @@ function mousePressed() {
   if (!coinInserted) {
     let d1 = dist(mouseX, mouseY, coinX, coinY);
     if (d1 < coinSize / 2) {
+      if (currentSound && currentSound.isPlaying()) {
+        currentSound.stop();
+      }
+
+      isActive = false;
+      bgColor = color('#FABBAF');
+
       holdingCoin = true;
       showHint = true;
     }
   }
+
   if (holdingCoin) {
     let slotX = thismachine.x + 150;
     let slotY = thismachine.y + 150;
@@ -309,6 +331,12 @@ class Machine {
         }
       }
       else if (this.isShaking == true) {
+        for (let i = s / 2; i < width; i += s) {
+          for (let j = s / 2; j < height; j += s) {
+            fill(random(255), random(255), random(255));
+            circle(i, j, s);
+          }
+        }
         if (!this.shakeSoundPlayed) {
           shakeSound.play();
           shakeSound.setVolume(1.6);
@@ -331,6 +359,7 @@ class Machine {
         }
       }
       else if (this.isDrawn == true) {
+        isActive = true;
         //drawn bgm
         for (let i = 1; i <= 8; i++) {
           let group = window["sound" + i];
@@ -343,25 +372,52 @@ class Machine {
           }
         }
         let idx = int(random(imgs.length));
+
         let chosenImg = imgs[idx];
         for (let i = 0; i < NUM_OF_PARTICLES; i++) {
-          particles.push(new Particle(380, 400, chosenImg));
+          particles.push(new Particle(this.x, this.y * 1.4, chosenImg));
         }
 
         let soundArray = null;
 
-        if (idx == 0) soundArray = sound1;
-        if (idx == 1) soundArray = sound2;
-        if (idx == 2) soundArray = sound3;
-        if (idx == 3) soundArray = sound4;
-        if (idx == 4) soundArray = sound5;
-        if (idx == 5) soundArray = sound6;
-        if (idx == 6) soundArray = sound7;
-        if (idx == 7) soundArray = sound8;
+
+        if (idx == 0 && isActive == true) {
+          soundArray = sound1;
+          bgColor = color('#E9CFFA');
+        }
+        if (idx == 1 && isActive == true) {
+          soundArray = sound2;
+          bgColor = color('#D4FACF');
+        }
+        if (idx == 2 && isActive == true) {
+          soundArray = sound3;
+          bgColor = color('#D1BDA5');
+        }
+        if (idx == 3 && isActive == true) {
+          soundArray = sound4;
+          bgColor = color('#C7F1FC');
+        }
+        if (idx == 4 && isActive == true) {
+          soundArray = sound5;
+          bgColor = color('#FFF7D9');
+        }
+        if (idx == 5 && isActive == true) {
+          soundArray = sound6;
+          bgColor = color('#FF7A7A');
+        }
+        if (idx == 6 && isActive == true) {
+          soundArray = sound7;
+          bgColor = color('#C2C2C2');
+        }
+        if (idx == 7 && isActive == true) {
+          soundArray = sound8;
+          bgColor = color('#FFE8FF');
+        }
 
         if (soundArray && soundArray.length > 0) {
           let drawnSound = int(random(soundArray.length));
-          soundArray[drawnSound].play();
+          currentSound = soundArray[drawnSound];
+          currentSound.play();
         }
 
         this.isDrawn = false;
@@ -439,7 +495,7 @@ class Particle {
   move() {
     this.x += this.xSpd;
     this.y += this.ySpd;
-    this.lifespan -= 4;
+    this.lifespan -= 2;
   }
   display() {
     push();
@@ -450,8 +506,8 @@ class Particle {
   }
 }
 function drawCoin() {
-  let coinX = width - 70;
-  let coinY = height - 70;
+  let coinX = width - 270;
+  let coinY = height - 170;
 
   if (frameCount > hintStartTime && !holdingCoin && !coinInserted) {
     coinFloatOffset = sin(frameCount * 0.05) * 6;
